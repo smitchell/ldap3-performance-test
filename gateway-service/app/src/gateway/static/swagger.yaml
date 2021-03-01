@@ -1,0 +1,346 @@
+openapi: 3.0.0
+info:
+  title: Gateway Service
+  version: 1.0.0
+
+servers:
+  - url: http://127.0.0.1:5000
+    description: Local testing
+
+paths:
+  /api/entries:
+    post:
+      summary: Adds a new entry
+      description: Creates a new entry with the specified dn, object classes and attributes
+      parameters:
+        - in: query
+          name: server_name
+          schema:
+            type: string
+          required: false
+          description: The name of the server, e.g. mocked, test, prod
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddEntryRequest'
+      responses:
+        '201':
+          description: Entry created
+        '400':
+          description: The request JSON was not valid, or the dn is in use.
+        '500':
+          description: LDAP returned false
+
+  /api/entry/{dn}:
+    get:
+      summary: Lookup an entry by DN
+      description: Given a distinguished name, returns an entry
+      parameters:
+        - in: query
+          name: server_name
+          schema:
+            type: string
+          required: false
+        - in: path
+          name: dn
+          schema:
+            type: string
+          required: true
+          description: Distinguished Name of the entry to get
+          example:
+            cn=mwatkins,ou=employees,ou=finance,dc=acme,dc=com
+      responses:
+        '200':
+          description: LDAP returned true.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+        '400':
+          description: The request JSON was not valid.
+        '404':
+          description: The DN does not exist.
+        '500':
+          description: LDAP returned false.
+    put:
+      summary: Modifies an exiting entry
+      description: See https://ldap3.readthedocs.io/en/latest/modify.html
+      parameters:
+        - in: query
+          name: server_name
+          schema:
+            type: string
+          required: false
+          description: The name of the server, e.g. mocked, test, prod
+        - in: path
+          name: dn
+          schema:
+            type: string
+          required: true
+          description: Distinguished Name of the entry to update
+          example:
+            cn=mwatkins,ou=employees,ou=finance,dc=acme,dc=com
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifyEntryRequest'
+      responses:
+        '200':
+          description: LDAP returned true.
+        '400':
+          description: The request JSON was not valid.
+        '404':
+          description: The DN does not exist.
+        '500':
+          description: LDAP returned false.
+    delete:
+      summary: Delete an entry by DN
+      description: Given a distinguished name, deletes an entry
+      parameters:
+        - in: query
+          name: server_name
+          schema:
+            type: string
+          required: false
+          description: The name of the server, e.g. mocked, test, prod
+        - in: path
+          name: dn
+          schema:
+            type: string
+          required: true
+          description: Distinguished Name of the entry to delete
+          example:
+            cn=mwatkins,ou=employees,ou=finance,dc=acme,dc=com
+      responses:
+        '204':
+          description: OK.
+        '500':
+          description: LDAP returned false.
+
+
+  /api/search:
+    post:
+      summary: Searches entries by posted search criteria.
+      description: See https://ldap3.readthedocs.io/en/latest/searches.html
+      parameters:
+        - in: query
+          name: server_name
+          schema:
+            type: string
+          required: false
+          description: The name of the server, e.g. mocked, test, prod
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchCriteria'
+      responses:
+        '200':
+          description: LDAP returned a response.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Entry'
+        '400':
+          description: The request JSON was not valid.
+        '500':
+          description: LDAP returned false.
+components:
+  schemas:
+    AddEntryRequest:
+      description: This is the distinguished name, object class,s and attributes, and controls (optional) for a new LDAP entry.
+      type: object
+      required:
+        - dn
+        - object_class
+        - attributes
+      properties:
+        dn:
+          description: The distinguished name for this entry. It must be unique.
+          type: string
+          example:
+            cn=mwatkins,ou=employees,ou=finance,dc=acme,dc=com
+        object_class:
+          description: A comma delimited string of object classes.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          example:
+            inetOrgPerson
+        attributes:
+          description: The dictionary of attributes and values to be added.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          example:
+            cn: mwatkins
+            dn: cn=mwatkins,ou=employees,ou=finance,dc=acme,dc=com
+            first_name: Mike
+            last_name: Watkins
+        controls:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          example:
+            LDAP_CONTROL_PWEXPIRED: true
+
+    Entry:
+      type: object
+      description: A LDAP entry dn and its attributes.
+      properties:
+        dn:
+          type: string
+          example:
+            cn=mgrables,ou=employees,ou=finance,dc=acme,dc=com
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            cn: mgrables
+            dn: cn=mgrables,ou=employees,ou=finance,dc=acme,dc=com
+            first_name: Maxine
+            last_name: Gables
+            mail: m.gables@company.com
+
+    ModifyEntryRequest:
+      type: object
+      description: The distinguished name of the entry to modify along with a list of changes.
+      required:
+        - dn
+        - changes
+      properties:
+        dn:
+          type: string
+          example:
+            cn=mwatkins,ou=employees,ou=finance,dc=acme,dc=com
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Change'
+
+        controls:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            LDAP_CONTROL_PWEXPIRED: true
+
+
+    Operation:
+      type: object
+      description: https://ldap3.readthedocs.io/en/latest/modify.html
+      required:
+        - operation
+        - values
+      properties:
+        operation:
+          type: string
+          enum:
+            - MODIFY_ADD
+            - MODIFY_DELETE
+            - MODIFY_REPLACE
+            - MODIFY_INCREMENT
+        values:
+          type: array
+          items:
+            type: string
+
+    Change:
+      type: object
+      required:
+        - attribute_name
+        - operations
+      properties:
+        attribute_name:
+          type: string
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Operation'
+
+    SearchCriteria:
+      type: object
+      description: See https://ldap3.readthedocs.io/en/latest/searches.html
+      required:
+        - search_base
+        - search_filter
+        - search_scope
+      properties:
+        search_base:
+          type: string
+          example: cn=employees,ou=test,o=lab
+        search_filter:
+          type: string
+          example: (objectClass=organizationalUnit)
+        search_scope:
+          type: string
+          enum:
+            - BASE
+            - LEVEL=LEVEL
+            - SUBTREE
+          default: SUBTREE
+          example: SUBTREE
+        dereference_aliases:
+          type: string
+          enum:
+            - DEREF_NEVER
+            - DEREF_SEARCH
+            - DEREF_BASE
+            - DEREF_ALWAYS
+          default: DEREF_ALWAYS
+          example:
+        attributes:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          default: null
+          example: ALL_ATTRIBUTES
+        size_limit:
+          type: integer
+          default: 0
+          example: 20
+        time_limit:
+          type: integer
+          default: 0
+          example: 100
+        types_only:
+          type: boolean
+          default: false
+          example: true
+        get_operational_attributes:
+          type: boolean
+          default: false
+          example: true
+        controls:
+          type: array
+          items:
+            type: string
+          example: effectiverights "(objectclass=*)"
+        paged_size:
+          type: integer
+          default: null
+          example: 50
+        paged_criticality:
+          type: boolean
+          default: false
+          example: true
+        paged_cookie:
+          type: object
+          default: null
+          example: null
