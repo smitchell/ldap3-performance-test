@@ -1,0 +1,45 @@
+---
+swagger:
+  api_url: /static/swagger.yaml
+  ui_url: /api/docs
+
+ldap_mocked:
+  description: In memory LDAP Server
+  ldap_host: ldap://localhost
+  server_config:
+    get_info: ALL
+    port: 389
+  connection_config:
+    auto_bind: True
+    auto_referrals: True
+    client_strategy: MOCK_SYNC
+    user: cn=admin,dc=test,dc=lab
+
+ldap_servers:
+
+  local:
+    description: Local OpenLDAP server
+    ldap_host: ldap://192.168.1.5
+    server_config:
+      port: 389
+      use_ssl: False
+    connection_config:
+      auto_bind: True
+      authentication: SIMPLE
+      auto_referrals: True
+      client_strategy: SAFE_SYNC
+      user: cn=admin,dc=byteworks,dc=com
+
+  test:
+    description: Local OpenLDAP server
+    ldap_host: ldap://192.168.1.5
+    server_config:
+      port: 389
+      use_ssl: False
+    connection_config:
+      auto_bind: True
+      get_info: ALL
+      authentication: SIMPLE
+      auto_referrals: True
+      client_strategy: SYNC
+      user: cn=admin,dc=byteworks,dc=com

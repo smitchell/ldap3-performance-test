@@ -1,0 +1,5 @@
+---
+swagger:
+  api_url: /static/swagger.yaml
+  ui_url: /api/docs
+
