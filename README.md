@@ -76,7 +76,7 @@ ALtenratively, go directly to the [LDAP Swagger UI page](http://localhost:5002/a
 
 # LOAD TESTING
 
-Be sure that JMeter is install and in your path.
+Be sure that [JMeter](https://jmeter.apache.org/download_jmeter.cgi) is install and in your path.
 
 ## Start JMeter
 
