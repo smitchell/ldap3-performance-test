@@ -5,10 +5,34 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://127.0.0.1:5002
+  - url: http://ldap-service:5002
     description: Local testing
 
 paths:
+
+  /api/health_check:
+    get:
+      description: Health check to retrun static content
+      parameters:
+        - in: query
+          name: action_status
+          description: Only valid in combination with asynchronous = true
+          required: false
+          schema:
+            type: string
+            enum:
+              - SUBMITTED
+              - DRAFT
+            default: SUBMITTED
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'
+
+
   /api/entries:
     post:
       summary: Adds a new entry
@@ -31,8 +55,16 @@ paths:
           description: Entry created
         '400':
           description: The request JSON was not valid, or the dn is in use.
+          content:
+            text/plain:
+              schema:
+                type: string
         '500':
           description: LDAP returned false
+          content:
+            text/plain:
+              schema:
+                type: string
 
   /api/entry/{dn}:
     get:
@@ -61,10 +93,22 @@ paths:
                 $ref: '#/components/schemas/Entry'
         '400':
           description: The request JSON was not valid.
+          content:
+            text/plain:
+              schema:
+                type: string
         '404':
           description: The DN does not exist.
+          content:
+            text/plain:
+              schema:
+                type: string
         '500':
           description: LDAP returned false.
+          content:
+            text/plain:
+              schema:
+                type: string
     put:
       summary: Modifies an exiting entry
       description: See https://ldap3.readthedocs.io/en/latest/modify.html
@@ -94,10 +138,22 @@ paths:
           description: LDAP returned true.
         '400':
           description: The request JSON was not valid.
+          content:
+            text/plain:
+              schema:
+                type: string
         '404':
           description: The DN does not exist.
+          content:
+            text/plain:
+              schema:
+                type: string
         '500':
           description: LDAP returned false.
+          content:
+            text/plain:
+              schema:
+                type: string
     delete:
       summary: Delete an entry by DN
       description: Given a distinguished name, deletes an entry
@@ -119,8 +175,16 @@ paths:
       responses:
         '204':
           description: OK.
+          content:
+            text/plain:
+              schema:
+                type: string
         '500':
           description: LDAP returned false.
+          content:
+            text/plain:
+              schema:
+                type: string
 
 
   /api/search:
@@ -151,10 +215,19 @@ paths:
                   $ref: '#/components/schemas/Entry'
         '400':
           description: The request JSON was not valid.
+          content:
+            text/plain:
+              schema:
+                type: string
         '500':
           description: LDAP returned false.
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
   schemas:
+
     AddEntryRequest:
       description: This is the distinguished name, object class,s and attributes, and controls (optional) for a new LDAP entry.
       type: object
@@ -216,6 +289,23 @@ components:
             first_name: Maxine
             last_name: Gables
             mail: m.gables@company.com
+
+    HealthCheck:
+      description: System health check
+      type: object
+      properties:
+        system:
+          type: string
+        status:
+          type: string
+        database_status:
+          type: string
+        hostname:
+          type: string
+        ip_addr:
+          type: string
+        date_time:
+          type: Date
 
     ModifyEntryRequest:
       type: object

@@ -4,7 +4,7 @@ from urllib import parse
 
 from flask import Response
 from flask import current_app
-from requests import post, put, delete, RequestException
+from requests import get, post, put, delete, RequestException
 
 from gateway.app import app
 from gateway.dtos.add_entry_request import AddEntryRequest
@@ -21,7 +21,14 @@ class LdapController:
     def __init__(self):
         with app.app_context():
             self.logger = current_app.logger
-            self.host_url = current_app.config['ldap_service_url']
+            self.host_url = app.config['ldap_service_url']
+
+    def get_health_check(self) -> Response:
+        try:
+            return get(f'{self.host_url}/api/health_check')
+        except RequestException as e:
+            self.logger.error(f'{__name__} {e}')
+            return self.create_error_response(500, str(e))
 
     def add(self, add_entry_request: AddEntryRequest, args: dict) -> Response:
         try:

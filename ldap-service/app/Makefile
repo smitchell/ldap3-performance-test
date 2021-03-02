@@ -28,7 +28,7 @@ build:
 	@echo "name: $(MODULE)"
 	@echo "version: $(TAG)${NC}"
 	@docker build -t $(IMAGE):$(TAG) -t $(IMAGE):latest ../
-	@echo "\n${BLUE}Run: docker run -v ~/.config/ldap_service/config.yaml:/etc/ldap_service/config.yaml -p 5002:5002 --name $(MODULE) $(IMAGE):$(TAG)${NC}\n"
+	@echo "\n${BLUE}Run: docker run -v ~/.config/ldap_service/config.yaml:/etc/ldap_service/config.yaml -p 5002:5002 --network="host" --name $(MODULE) $(IMAGE):$(TAG)${NC}\n"
 
 clean:
 	rm -rf .pytest_cache .coverage .pytest_cache coverage.xml

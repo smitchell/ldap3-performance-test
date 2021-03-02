@@ -6,9 +6,12 @@ from urllib.parse import unquote
 from flask import Blueprint, Response, make_response
 from flask import json
 from flask import request
+from gateway.schemas.health_check_schema import HealthCheckSchema
+
+from gateway.dtos.health_check import HealthCheck
 from marshmallow import ValidationError
 from requests import models
-
+import socket
 from gateway.controllers.ldap_controller import LdapController
 from gateway.dtos.add_entry_request import AddEntryRequest
 from gateway.dtos.modify_entry_request import ModifyEntryRequest
@@ -27,8 +30,24 @@ def get_blueprint():
     """Return the blueprint for the main app module"""
     return gateway_api_blueprint
 
+@gateway_api_blueprint.route('/api/health_check', methods=['GET'])
+def get_gateway_health_check() -> Response:
+    health_check = HealthCheck(__name__)
+    health_check.hostname = socket.gethostname()
+    try:
+        health_check.ip_addr = socket.gethostbyname(health_check.hostname)
+    except socket.gaierror as e:
+        logging.warning(f'socket.gethostbyname failed for {health_check.hostname} {e}')
+    return make_response(HealthCheckSchema().dump(health_check), 200)
 
-@gateway_api_blueprint.route('/gateway/entries', methods=['POST'])
+
+@gateway_api_blueprint.route('/api/ldap/health_check', methods=['GET'])
+def get_ldap_health_check() -> Response:
+    request_resp: models.Response = ldap_controller.get_health_check()
+    return _flask_resp(request_resp)
+
+
+@gateway_api_blueprint.route('/api/entries', methods=['POST'])
 def add_entry() -> Response:
     try:
         data = request.get_data(as_text=True)
@@ -50,7 +69,7 @@ def add_entry() -> Response:
         return make_text_response(str(e), 500)
 
 
-@gateway_api_blueprint.route('/gateway/entry/<string:encoded_dn>', methods=['GET'])
+@gateway_api_blueprint.route('/api/entry/<string:encoded_dn>', methods=['GET'])
 def get_entry(encoded_dn: str) -> Response:
     try:
         if encoded_dn is None:
@@ -70,7 +89,7 @@ def get_entry(encoded_dn: str) -> Response:
         return make_text_response(str(e), 500)
 
 
-@gateway_api_blueprint.route('/gateway/entry/<string:dn>', methods=['PUT'])
+@gateway_api_blueprint.route('/api/entry/<string:dn>', methods=['PUT'])
 def modify_entry(dn: str) -> Response:
     try:
         if dn is None:
@@ -89,7 +108,7 @@ def modify_entry(dn: str) -> Response:
         return make_text_response(str(e), 500)
 
 
-@gateway_api_blueprint.route('/gateway/search', methods=['POST'])
+@gateway_api_blueprint.route('/api/search', methods=['POST'])
 def search() -> Response:
     try:
         data = request.get_data(as_text=True)
@@ -101,7 +120,7 @@ def search() -> Response:
         return make_text_response(str(e), 500)
 
 
-@gateway_api_blueprint.route('/gateway/entry/<string:dn>', methods=['DELETE'])
+@gateway_api_blueprint.route('/api/entry/<string:dn>', methods=['DELETE'])
 def delete_entry(dn: str) -> Response:
     try:
         request_resp: models.Response = ldap_controller.delete(unquote(dn), request.args)
@@ -118,11 +137,13 @@ def make_text_response(message: str, code: int):
 
 def _flask_resp(request_resp: models.Response) -> Response:
     if request_resp is None:
+        logging.warning(f'{__name__} _flask_resp is None')
         return make_response(500)
     content_type = request_resp.headers.get('Content-Type', None)
+    logging.info(f'{__name__} _flask_resp content_type is {content_type}: {request_resp.content}')
     if content_type == 'application/json':
         flask_resp: Response = make_response(request_resp.json(), request_resp.status_code)
     else:
-        flask_resp: Response = make_response(request_resp.text, request_resp.status_code)
+        flask_resp: Response = make_response(request_resp.content, request_resp.status_code)
     flask_resp.content_type = content_type
     return flask_resp

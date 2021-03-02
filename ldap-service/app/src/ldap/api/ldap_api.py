@@ -2,17 +2,19 @@
 import logging
 from typing import Any
 from urllib.parse import unquote
+import socket
 
-import requests
 from flask import Blueprint, Response, make_response
 from flask import json
 from flask import request
 
 from ldap.controllers.ldap_controller import LdapController
 from ldap.dtos.add_entry_request import AddEntryRequest
+from ldap.dtos.health_check import HealthCheck
 from ldap.dtos.modify_entry_request import ModifyEntryRequest
 from ldap.dtos.search_results import SearchResults
 from ldap.schemas.add_entry_request_schema import AddEntryRequestSchema
+from ldap.schemas.health_check_schema import HealthCheckSchema
 from ldap.schemas.modify_entry_request_schema import ModifyEntryRequestSchema
 from ldap.schemas.search_results_schema import SearchResultsSchema
 from ldap.schemas.search_schema import SearchSchema
@@ -26,6 +28,16 @@ success = 'success'
 def get_blueprint():
     """Return the blueprint for the main app module"""
     return ldap_api_blueprint
+
+@ldap_api_blueprint.route('/api/health_check', methods=['GET'])
+def get_gateway_health_check() -> Response:
+    health_check = HealthCheck(__name__)
+    health_check.hostname = socket.gethostname()
+    try:
+        health_check.ip_addr = socket.gethostbyname(health_check.hostname)
+    except socket.gaierror as e:
+        logging.warning(f'socket.gethostbyname failed for {health_check.hostname} {e}')
+    return make_response(HealthCheckSchema().dump(health_check), 200)
 
 
 @ldap_api_blueprint.route('/api/entries', methods=['POST'])

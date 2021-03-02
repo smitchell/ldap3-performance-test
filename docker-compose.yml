@@ -1,0 +1,58 @@
+version: '3.3'
+
+networks:
+  bridge-network:
+    driver: bridge
+
+services:
+  gateway-service:
+    build:
+      context: gateway-service
+    healthcheck:
+      test: "curl --fail --silent localhost:5000//api/health_check | grep OK || exit 1"
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      - ldap-service
+    links:
+      - ldap-service
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 100M
+        reservations:
+          cpus: '0.25'
+          memory: 20M
+    ports:
+      - 5000:5000
+    restart: always
+    networks:
+      - bridge-network
+    volumes:
+      - /Users/stevemitchell/.config/gateway_service/config.yaml:/etc/gateway_service/config.yaml
+
+  ldap-service:
+    build:
+      context: ldap-service
+    healthcheck:
+      test: "curl --fail --silent localhost:5002//api/health_check | grep OK || exit 1"
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 100M
+        reservations:
+          cpus: '0.25'
+          memory: 20M
+    ports:
+      - 5002:5002
+    restart: always
+    networks:
+      - bridge-network
+    volumes:
+      - /Users/stevemitchell/.config/ldap_service/config.yaml:/etc/ldap_service/config.yaml
