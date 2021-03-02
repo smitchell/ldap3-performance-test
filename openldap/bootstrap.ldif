@@ -1,0 +1,59 @@
+# Organizational Units
+dn: ou=groups,dc=byteworks,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: groups
+
+dn: ou=subgroups,ou=groups,dc=byteworks,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: subgroups
+
+dn: ou=people,dc=byteworks,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: people
+
+# Create People
+dn: uid=john,ou=people,dc=byteworks,dc=com
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: John Doe
+sn: John
+uid: john
+userPassword: {SSHA}kYUFiVH/ThYh/UmE1Wc8gXAjboCIvuAe9E2jvw==
+
+dn: uid=jane,ou=people,dc=byteworks,dc=com
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Jane Doe
+sn: Jane
+uid: jane
+userPassword: {SSHA}kYUFiVH/ThYh/UmE1Wc8gXAjboCIvuAe9E2jvw==
+
+# Create Groups
+dn: cn=employees,ou=groups,dc=byteworks,dc=com
+objectclass: top
+objectclass: groupOfUniqueNames
+cn: employees
+ou: employee
+uniqueMember: uid=john,ou=people,dc=byteworks,dc=com
+
+dn: cn=users,ou=groups,dc=byteworks,dc=com
+objectclass: top
+objectclass: groupOfUniqueNames
+cn: users
+ou: user
+uniqueMember: uid=john,ou=people,dc=byteworks,dc=com
+uniqueMember: uid=jane,ou=people,dc=byteworks,dc=com
+
+dn: cn=customers,ou=groups,dc=byteworks,dc=com
+objectclass: top
+objectclass: groupOfUniqueNames
+cn: customers
+ou: customer
+uniqueMember: uid=jane,ou=people,dc=byteworks,dc=com

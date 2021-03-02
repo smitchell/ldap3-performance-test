@@ -5,6 +5,21 @@ networks:
     driver: bridge
 
 services:
+
+  openldap-server:
+    build:
+      context: openldap
+    environment:
+      LDAP_ADMIN_PASSWORD: D1Wt#s5BAi7L
+      LDAP_BASE_DN: dc=byteworks,dc=com
+    networks:
+      - bridge-network
+    ports:
+      - 389:389
+    volumes:
+      - ldap_data:/var/lib/ldap
+      - ldap_config:/etc/ldap/slapd.d
+
   gateway-service:
     build:
       context: gateway-service
@@ -20,8 +35,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.75'
-          memory: 100M
+          cpus: '0.5'
+          memory: 50M
         reservations:
           cpus: '0.25'
           memory: 20M
@@ -31,7 +46,7 @@ services:
     networks:
       - bridge-network
     volumes:
-      - /Users/stevemitchell/.config/gateway_service/config.yaml:/etc/gateway_service/config.yaml
+      - /Users/stevemitchell/Development/python_projects/ldap_load_testing/configs/gateway-service.yml:/etc/gateway_service/config.yaml
 
   ldap-service:
     build:
@@ -41,11 +56,15 @@ services:
       interval: 20s
       timeout: 5s
       retries: 5
+    depends_on:
+      - openldap-server
+    links:
+      - openldap-server
     deploy:
       resources:
         limits:
-          cpus: '0.75'
-          memory: 100M
+          cpus: '0.5'
+          memory: 50M
         reservations:
           cpus: '0.25'
           memory: 20M
@@ -55,4 +74,8 @@ services:
     networks:
       - bridge-network
     volumes:
-      - /Users/stevemitchell/.config/ldap_service/config.yaml:/etc/ldap_service/config.yaml
+      - /Users/stevemitchell/Development/python_projects/ldap_load_testing/configs/ldap-service.yml:/etc/ldap_service/config.yaml
+
+volumes:
+  ldap_data:
+  ldap_config:

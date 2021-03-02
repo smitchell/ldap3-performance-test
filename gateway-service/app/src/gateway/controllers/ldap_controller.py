@@ -22,6 +22,7 @@ class LdapController:
         with app.app_context():
             self.logger = current_app.logger
             self.host_url = app.config['ldap_service_url']
+            print(self.host_url)
 
     def get_health_check(self) -> Response:
         try:

@@ -1,0 +1,55 @@
+---
+swagger:
+  api_url: /static/swagger.yaml
+  ui_url: /api/docs
+
+ldap_mocked:
+  description: In memory LDAP Server
+  ldap_host: ldap://localhost
+  server_config:
+    get_info: ALL
+    port: 389
+  connection_config:
+    auto_bind: True
+    auto_referrals: True
+    client_strategy: MOCK_SYNC
+    password: password
+    user: cn=admin,dc=test,dc=lab
+
+ldap_servers:
+
+  local:
+    description: Docker OpenLDAP server
+    ldap_host: ldap://openldap-server
+    server_config:
+      port: 389
+      use_ssl: False
+    connection_config:
+      auto_bind: True
+      authentication: SIMPLE
+      auto_referrals: True
+      client_strategy: SAFE_RESTARTABLE
+      receive_timeout: 60
+      collect_usage: True
+      raise_exceptions: True
+      pool_name: POOL1_READ_WRITE
+      pool_size: 5
+      pool_keepalive: 30
+      pool_lifetime: 600
+      user: cn=admin,dc=byteworks,dc=com
+      password: "D1Wt#s5BAi7L"
+
+  test:
+    description: Local OpenLDAP server
+    ldap_host: ldap://192.168.1.5
+    server_config:
+      port: 389
+      use_ssl: False
+    connection_config:
+      auto_bind: True
+      get_info: ALL
+      authentication: SIMPLE
+      auto_referrals: True
+      client_strategy: SYNC
+      user: cn=admin,dc=byteworks,dc=com
+      password: "D1Wt#s5BAi7L"

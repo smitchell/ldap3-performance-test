@@ -4,6 +4,7 @@ from typing import Optional
 
 from flask import current_app
 from ldap3 import Server, Connection, ServerPool, ROUND_ROBIN
+from ldap3.core.usage import ConnectionUsage
 
 from ldap.app import app
 
@@ -64,4 +65,25 @@ class ConnectionManager:
         if params is not None:
             connection_config.update(params)
         conn = Connection(self.server_pools[server_name], **connection_config)
+        if conn.last_error is not None:
+            self.logger.error('Last connection error' + conn.last_error)
+        if conn.usage is not None:
+            usage: ConnectionUsage = conn.usage
+            print(f'LDAP Connection Usage restartable_failures: {usage.restartable_failures}')
+            # print(f'LDAP Connection Usage restartable_successes: {usage.restartable_successes}')
+            # print(f'LDAP Connection Usage bind_operations: {usage.bind_operations}')
+            print(f'LDAP Connection Usage abandon_operations: {usage.abandon_operations}')
+            print(f'LDAP Connection Usage initial start: {usage.initial_connection_start_time}')
+            # print(f'LDAP Connection Usage last_received_time: {usage.last_received_time}')
+            # print(f'LDAP Connection Usage last_transmitted_time: {usage.last_transmitted_time}')
+            print(f'LDAP Connection Usage  elapsed_time: {usage.elapsed_time}')
+            # print(f'LDAP Connection Usage open_socket_start_time: {usage.open_socket_start_time}')
+            # print(f'LDAP Connection Usage open_sockets: {usage.open_sockets}')
+            # print(f'LDAP Connection Usage servers_from_pool: {usage.servers_from_pool}')
+            # print(f'LDAP Connection Usage unbind_operations: {usage.unbind_operations}')
+            # print(f'LDAP Connection Usage closed_sockets: {usage.closed_sockets}')
+            # print(f'LDAP Connection Usage add_operations: {usage.add_operations}')
+            # print(f'LDAP Connection Usage modify_operations: {usage.modify_operations}')
+            # print(f'LDAP Connection Usage delete_operations: {usage.delete_operations}')
+            # print(f'LDAP Connection Usage search_operations: {usage.search_operations}')
         return conn
