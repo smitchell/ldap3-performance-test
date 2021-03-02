@@ -80,7 +80,7 @@ ALtenratively, go directly to the [LDAP Swagger UI page](http://localhost:5002/a
 
 # Load Testing
 
-Be sure that [JMeter](https://jmeter.apache.org/download_jmeter.cgi) is install and in your path.
+Be sure that [JMeter](https://jmeter.apache.org/download_jmeter.cgi) is installed and in your path.
 
 ## Start JMeter
 
@@ -88,9 +88,9 @@ Be sure that [JMeter](https://jmeter.apache.org/download_jmeter.cgi) is install 
 jmeter
 ```
 
-## Open the Load Test
+## Load Tests
 
-The load tests are locate in the jmeter folder at the root of this project. There are two JMeter tests:
+The load tests are located in the jmeter folder at the root of this project. There are two JMeter tests:
 
 * CRUDTestJMeter.jmx - This thread group runs once and does an Add, Search, Modify, and Delete.
 * APILoadTestJMeter.jmx - This thread group runs until it is manually stopped. It looks up the same user by UID over and over.
