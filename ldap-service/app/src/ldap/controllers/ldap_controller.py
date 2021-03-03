@@ -186,8 +186,6 @@ class LdapController:
                     result['dn'] = entry.entry_dn
                 elif hasattr(entry, 'dn'):
                     result['dn'] = entry['dn']
-                elif hasattr(entry, 'DN'):
-                    result['dn'] = entry['DN']
 
                 if 'entry_attributes_as_dict' in entry:
                     result['attributes'] = entry.entry_attributes_as_dict
