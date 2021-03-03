@@ -44,7 +44,6 @@ def get_gateway_health_check() -> Response:
 def add_entry() -> Response:
     data = request.get_data(as_text=True)
     json_data = json.loads(data)
-    print(json_data)
     if type(json_data) == dict:
         add_entry_request: AddEntryRequest = AddEntryRequestSchema().load(json_data)
     else:

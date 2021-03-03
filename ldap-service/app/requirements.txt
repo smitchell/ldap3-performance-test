@@ -13,3 +13,4 @@ argparse==1.4.0
 flask-swagger-ui==3.36.0
 ldap3==2.9
 marshmallow==3.10.0
+wheel==0.36.2

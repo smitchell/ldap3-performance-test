@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import json
+
 from ldap.controllers.connection_manager import ConnectionManager
 from ldap.controllers.ldap_controller import LdapController
 from ldap.dtos.search_results import SearchResults
@@ -27,7 +29,11 @@ def test_delete_good_dn():
         'attributes': 'ALL_ATTRIBUTES'
     }
 
-    assert controller.delete(mocked_name, dn)
+    delete_result = controller.delete(mocked_name, dn)
+    print(f'delete result {delete_result}')
+    assert delete_result, f'Expected true but found {str(delete_result)}'
 
-    search_results: SearchResults = controller.search(mocked_name, search_schema.load(data))
+    search_results = controller.search(mocked_name, search_schema.load(data))
+    print(f'search_results {search_results}')
+
     assert len(search_results.data) == 0, f'AFTER: Expected 1 search result but found {search_results.data}'
