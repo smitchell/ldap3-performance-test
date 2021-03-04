@@ -4,7 +4,7 @@ from urllib import parse
 
 from flask import Response
 from flask import current_app
-from requests import get, post, put, delete, RequestException
+from requests import get, post, put, delete
 
 from gateway.app import app
 from gateway.dtos.add_entry_request import AddEntryRequest
@@ -27,7 +27,8 @@ class LdapController:
     def get_health_check(self) -> Response:
         try:
             return get(f'{self.host_url}/api/health_check')
-        except RequestException as e:
+        except Exception as e:
+            # e.g. ProtocolError, Exception
             self.logger.error(f'{__name__} {e}')
             return self.create_error_response(500, str(e))
 
@@ -36,7 +37,7 @@ class LdapController:
             schema: AddEntryRequestSchema = AddEntryRequestSchema()
             url = LdapController.make_url(f'{self.host_url}/api/entries', args)
             return post(url, json=schema.dumps(add_entry_request))
-        except RequestException as e:
+        except Exception as e:
             self.logger.error(f'{__name__} {e}', exc_info=True)
             return self.create_error_response(500, str(e))
 
@@ -49,7 +50,7 @@ class LdapController:
             return put(
                 url,
                 json=modify_json)
-        except RequestException as e:
+        except Exception as e:
             self.logger.error(f'{__name__} {e}', exc_info=True)
             return self.create_error_response(500, str(e))
 
@@ -58,7 +59,7 @@ class LdapController:
             schema: SearchSchema = SearchSchema()
             url = LdapController.make_url(f'{self.host_url}/api/search', args)
             return post(url, json=schema.dumps(s))
-        except RequestException as e:
+        except Exception as e:
             self.logger.error(f'{__name__} {e}', exc_info=True)
             return self.create_error_response(500, str(e))
 
@@ -67,7 +68,7 @@ class LdapController:
             encoded_dn = parse.quote(dn)
             url = LdapController.make_url(f'{self.host_url}/api/entry/{encoded_dn}', args)
             return delete(url)
-        except RequestException as e:
+        except Exception as e:
             self.logger.error(f'{__name__} {e}', exc_info=True)
             return self.create_error_response(500, str(e))
 

@@ -70,6 +70,7 @@ services:
           memory: 20M
     ports:
       - 5002:5002
+      - 9100:9100
     restart: always
     networks:
       - bridge-network
