@@ -151,9 +151,9 @@ class LdapController:
                                          paged_cookie=s.paged_cookie)
 
             if isinstance(response, tuple) and response[1] is not None and 'description' in response[1] and response[1]['description'] == LdapController.success:
-                results = LdapController._convert_results(response[2])
+                results = self._convert_results(response[2])
             elif connection.result is not None and 'description' in connection.result and connection.result['description'] == LdapController.success:
-                results = LdapController._convert_results(connection.entries)
+                results = self._convert_results(connection.entries)
 
         except Exception as e:
             self.logger.error(e)
@@ -175,22 +175,26 @@ class LdapController:
                 connection.unbind()
             return True
 
-    @staticmethod
-    def _convert_results(entries: List[Entry]) -> list:
+    def _convert_results(self, entries: List) -> list:
 
         results = []
         if entries is not None:
             for entry in entries:
                 result = {'dn': None, 'attributes': None}
                 if hasattr(entry, 'entry_dn'):
+                    print('hasattr(entry, \'entry_dn\') is True')
                     result['dn'] = entry.entry_dn
-                elif hasattr(entry, 'dn'):
+                elif 'dn' in entry:
                     result['dn'] = entry['dn']
+                else:
+                    self.logger.debug('Cannot find "dn" in entry: ' + str(entry))
 
-                if 'entry_attributes_as_dict' in entry:
+                if hasattr(entry, 'entry_attributes_as_dict'):
                     result['attributes'] = entry.entry_attributes_as_dict
                 elif 'attributes' in entry:
                     result['attributes'] = dict(entry['attributes'])
+                else:
+                    self.logger.debug('Cannot find "attributes" in entry: ' + str(entry))
                 results.append(result)
 
         return results
