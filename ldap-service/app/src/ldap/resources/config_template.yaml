@@ -7,7 +7,6 @@ ldap_mocked:
   description: In memory LDAP Server
   ldap_host: ldap://localhost
   server_config:
-    get_info: ALL
     port: 389
   connection_config:
     auto_bind: True
@@ -38,7 +37,6 @@ ldap_servers:
       use_ssl: False
     connection_config:
       auto_bind: True
-      get_info: ALL
       authentication: SIMPLE
       auto_referrals: True
       client_strategy: SYNC

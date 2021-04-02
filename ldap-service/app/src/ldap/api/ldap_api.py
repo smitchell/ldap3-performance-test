@@ -7,6 +7,7 @@ import socket
 from flask import Blueprint, Response, make_response
 from flask import json
 from flask import request
+from ldap3.core.usage import ConnectionUsage
 
 from ldap.controllers.ldap_controller import LdapController
 from ldap.dtos.add_entry_request import AddEntryRequest
@@ -33,6 +34,17 @@ def get_blueprint():
 def get_gateway_health_check() -> Response:
     health_check = HealthCheck(__name__)
     health_check.hostname = socket.gethostname()
+    try:
+        health_check.database_host = ldap_controller.get_ldap_host('test')
+    except Exception as e:
+        logging.error(f'error getting LDAP host {e}', exc_info=True)
+        health_check.database_host = 'ERROR'
+    try:
+        usage: ConnectionUsage = ldap_controller.get_ldap_usage('test')
+        health_check.database_status = "OK" if usage is not None else "ERROR"
+    except Exception as e:
+        logging.error(f'Error connecting to LDAP host {health_check.database_host} - {e}', exc_info=True)
+        health_check.database_status = 'ERROR'
     try:
         health_check.ip_addr = socket.gethostbyname(health_check.hostname)
     except socket.gaierror as e:

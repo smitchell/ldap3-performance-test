@@ -5,7 +5,7 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://ldap-service:5002
+  - url: http://localhost:5002
     description: Local testing
 
 paths:
@@ -13,17 +13,6 @@ paths:
   /api/health_check:
     get:
       description: Health check to retrun static content
-      parameters:
-        - in: query
-          name: action_status
-          description: Only valid in combination with asynchronous = true
-          required: false
-          schema:
-            type: string
-            enum:
-              - SUBMITTED
-              - DRAFT
-            default: SUBMITTED
       responses:
         200:
           description: OK
@@ -296,7 +285,9 @@ components:
       properties:
         system:
           type: string
-        status:
+        service_status:
+          type: string
+        database_host:
           type: string
         database_status:
           type: string

@@ -50,6 +50,13 @@ class ConnectionManager:
             conn.open()
         return conn
 
+    # This function was added for the health check
+    def get_ldap_host(self, server_name) -> str:
+        server_config: dict = self.ldap_configs[server_name]
+        if server_config is None:
+            return f'{server_name} configuration not found'
+        return server_config['ldap_host']
+
 
     def get_connection(self, server_name: str, params: dict = None):
         """
@@ -78,10 +85,10 @@ class ConnectionManager:
             # print(f'LDAP Connection Usage last_transmitted_time: {usage.last_transmitted_time}')
             print(f'LDAP Connection Usage  elapsed_time: {usage.elapsed_time}')
             # print(f'LDAP Connection Usage open_socket_start_time: {usage.open_socket_start_time}')
-            # print(f'LDAP Connection Usage open_sockets: {usage.open_sockets}')
+            print(f'LDAP Connection Usage open_sockets: {usage.open_sockets}')
             # print(f'LDAP Connection Usage servers_from_pool: {usage.servers_from_pool}')
             # print(f'LDAP Connection Usage unbind_operations: {usage.unbind_operations}')
-            # print(f'LDAP Connection Usage closed_sockets: {usage.closed_sockets}')
+            print(f'LDAP Connection Usage closed_sockets: {usage.closed_sockets}')
             # print(f'LDAP Connection Usage add_operations: {usage.add_operations}')
             # print(f'LDAP Connection Usage modify_operations: {usage.modify_operations}')
             # print(f'LDAP Connection Usage delete_operations: {usage.delete_operations}')

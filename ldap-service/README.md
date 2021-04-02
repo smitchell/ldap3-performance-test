@@ -19,9 +19,9 @@ This project uses the following libraries.
 * Swagger
 * Python Confuse
 
-## RUNNING LOCALLY
+# RUNNING LOCALLY
 
-### Configuration
+## Local Configuration
 The application configuration has been externalized. It is assumed that the environment specific configuration file is provided by a CI/CD 
 pipeline when the image is deployed. Configurations are handled by [Python Confuse Library](https://confuse.readthedocs.io/en/latest/#). 
 Python Confuse looks in these operation system locations under the application name:
@@ -47,6 +47,32 @@ ln -s $(pwd)/src/api/resources/config_template.yaml ~/.config/ldap_service/confi
 # Linux
 mkdir /etc/ldap_service
 cp ./src/ldap_service/resources/config_template.yaml /etc/ldap_service/config.yaml
+```
+
+# RUNNING IN DOCKER COMPOSE
+
+When using Docker Compose in the parent directory the configuration rules above still apply inside the Docker container; however,
+The two config files are copied from the ../configs directory one level above this directory.
+
+## Host Names
+
+The host names are defined in the Docker Compose, and referenced in the ../configs YAML files. If you run on K8S, pick your Service names
+and then edit the host names in the ../configs YAML files to match.
+
+For instance, in the ../configs/ldap_service.yml, change the ldap_host host URL to match the K8S Service name.
+```
+ldap_servers:
+  test:
+    description: Docker OpenLDAP server
+    ldap_host: ldap://openldap-server
+```
+
+Likewise, update src/ldap/static/swapper.yaml and update the LDAP Service hostname:
+
+```
+servers:
+  - url: http://localhost:5002
+    description: Local testing
 ```
 
 ### Running tests or Swagger

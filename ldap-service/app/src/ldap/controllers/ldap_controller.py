@@ -7,6 +7,7 @@ from ldap3 import Connection, ALL_ATTRIBUTES, ALL_OPERATIONAL_ATTRIBUTES, DEREF_
     DEREF_ALWAYS, BASE, LEVEL, SUBTREE, MODIFY_ADD, MODIFY_DELETE, MODIFY_REPLACE, MODIFY_INCREMENT
 from ldap3.abstract.entry import EntryBase, Entry
 from ldap3.core.exceptions import LDAPInvalidDnError, LDAPNoSuchObjectResult
+from ldap3.core.usage import ConnectionUsage
 from ldap3.utils.conv import escape_filter_chars
 
 from ldap.app import app
@@ -182,7 +183,6 @@ class LdapController:
             for entry in entries:
                 result = {'dn': None, 'attributes': None}
                 if hasattr(entry, 'entry_dn'):
-                    print('hasattr(entry, \'entry_dn\') is True')
                     result['dn'] = entry.entry_dn
                 elif 'dn' in entry:
                     result['dn'] = entry['dn']
@@ -198,6 +198,15 @@ class LdapController:
                 results.append(result)
 
         return results
+
+    # This function was added for the health check
+    def get_ldap_host(self, server_name) -> str:
+        ldap_host: str = self.connection_manager.get_ldap_host(server_name)
+        return ldap_host
+
+    def get_ldap_usage(self, server_name: str) -> ConnectionUsage:
+        connection: Connection = self.connection_manager.get_connection(server_name)
+        return connection.usage
 
     @staticmethod
     def _convert_attributes_keyword(value) -> Any:

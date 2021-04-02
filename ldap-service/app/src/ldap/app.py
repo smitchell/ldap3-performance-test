@@ -51,6 +51,7 @@ def app_init(app):
     app.config['ldap_servers'] = config['ldap_servers'].get(dict)
     keys = ['ldap_mocked', 'swagger']
     for key in keys:
+        app.logger.info(f'{key} = {config[key].get(dict)}')
         app.config[key] = config[key].get(dict)
 
     app_register_blueprints(app)

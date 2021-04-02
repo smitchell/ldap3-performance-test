@@ -9,8 +9,12 @@ class HealthCheck:
                  system: str,
                  hostname: str = None,
                  ip_addr: str = None,
-                 status: str = 'OK'):
+                 database_host: str = None,
+                 database_status: str = None,
+                 service_status: str = 'OK'):
         self.system = system
-        self.status = status
+        self.service_status = service_status
         self.hostname = hostname
+        self.database_host = database_host
+        self.database_status = database_status
         self.ip_addr = ip_addr

@@ -8,9 +8,9 @@ This project uses the following libraries.
 * Swagger
 * Python Confuse
 
-## RUNNING LOCALLY
+# RUNNING LOCALLY
 
-### Configuration
+## Configuration
 The application configuration has been externalized. It is assumed that the environment specific configuration file is provided by a CI/CD 
 pipeline when the image is deployed. Configurations are handled by [Python Confuse Library](https://confuse.readthedocs.io/en/latest/#). 
 Python Confuse looks in these operation system locations under the application name:
@@ -38,6 +38,34 @@ mkdir /etc/gateway_service
 cp ./app/src/gateway/resources/config_template.yaml /etc/gateway_service/config.yaml
 ```
 
+# RUNNING IN DOCKER COMPOSE
+
+When using Docker Compose in the parent directory the configuration rules above still apply inside the Docker container; however,
+The two config files are copied from the ../configs directory one level above this directory.
+
+## Host Names
+
+The host names are defined in the Docker Compose, and referenced in the ../configs YAML files. If you run on K8S, pick your Service names
+and then edit the host names in the ../configs YAML files to match.
+
+For instance, in the ../configs/gateway_service.yml, change the ldap_service_url URL to match the K8S Service name.
+```
+---
+swagger:
+  api_url: /static/swagger.yaml
+  ui_url: /api/docs
+
+ldap_service_url: http://ldap-service:5002
+```
+
+Likewise, update src/gateway/static/swapper.yaml and update the Gateway Service hostname:
+
+```
+servers:
+  - url: http://localhost:5000
+    description: Local testing
+```
+
 ### Running tests or Swagger
 
 1) python3 -m venv --copies venv
@@ -47,7 +75,7 @@ cp ./app/src/gateway/resources/config_template.yaml /etc/gateway_service/config.
 1) pip install .
 1) pytest
 1) make run
-8) http://localhost:5000/api/docs
+1) http://localhost:5000/api/docs
 
 # RESOURCES
 These are the references I used in structuring this project. Full disclosure, I wrote Java

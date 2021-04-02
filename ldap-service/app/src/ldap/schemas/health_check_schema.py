@@ -7,8 +7,10 @@ from ldap.dtos.health_check import HealthCheck
 
 class HealthCheckSchema(Schema):
     system = fields.Str(required=True, allow_none=False)
-    status = fields.Str(allow_none=True)
+    service_status = fields.Str(allow_none=True)
     hostname = fields.Str(allow_none=True)
+    database_host = fields.Str(allow_none=True)
+    database_status = fields.Str(allow_none=True)
     ip_addr = fields.Str(allow_none=True)
     date_time = fields.DateTime(allow_none=True)
 

@@ -41,7 +41,7 @@ def test_server_connection_config():
     assert config is not None, 'Expected mocked config, but found none'
 
     actual = config['client_strategy']
-    expected = 'SYNC'
+    expected = 'SAFE_RESTARTABLE'
     assert actual == expected, f'Expected {expected} but found {actual}'
 
     actual = config['authentication']
